@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+
+        <style>
+            @page {
+                size: A4;
+                margin: 20mm 15mm 20mm 15mm;
+
+                @bottom-center {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-size: 10px;
+                    color: #666;
+                }
+            }
+
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 12px;
+                color: #333;
+                margin: 0;
+            }
+
+            .header {
+                width: 100%;
+                border-bottom: 2px solid #333;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+
+            .company-name {
+                font-size: 22px;
+                font-weight: bold;
+            }
+
+            .company-info {
+                font-size: 11px;
+                color: #555;
+            }
+
+            .report-title {
+                text-align: center;
+                font-size: 18px;
+                font-weight: bold;
+                margin: 15px 0;
+                text-transform: uppercase;
+            }
+
+            .report-info {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .report-info td {
+                padding: 5px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th {
+                background: #eeeeee;
+                border: 1px solid #999;
+                padding: 8px;
+                text-align: center;
+                font-size: 12px;
+            }
+
+            td {
+                border: 1px solid #ccc;
+                padding: 7px;
+                font-size: 11px;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .summary {
+                margin-top: 20px;
+                width: 40%;
+                float: right;
+            }
+
+            .summary td {
+                padding: 8px;
+            }
+
+            .footer {
+                margin-top: 40px;
+                width: 100%;
+            }
+
+            .signature {
+                width: 30%;
+                text-align: center;
+                float: right;
+                margin-top: 50px;
+            }
+
+            .signature-line {
+                border-top: 1px solid #333;
+                margin-top: 40px;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <!-- HEADER -->
+        <div class="header">
+
+            <div class="company-name">
+                ABC Technologies Pvt Ltd
+            </div>
+
+            <div class="company-info">
+                123 Business Street, Mumbai, Maharashtra<br />
+                Email: info@company.com | Phone: +91 9876543210
+            </div>
+
+        </div>
+
+        <!-- REPORT TITLE -->
+        <div class="report-title">
+            Sales Report
+        </div>
+
+        <!-- REPORT DETAILS -->
+        <table class="report-info">
+
+            <tr>
+                <td><b>Report No:</b></td>
+                <td th:text="${reportNo}">SR-001</td>
+
+                <td><b>Date:</b></td>
+                <td th:text="${date}">29-07-2026</td>
+            </tr>
+
+            <tr>
+                <td><b>Customer:</b></td>
+                <td colspan="3" th:text="${customerName}">
+                    Customer Name
+                </td>
+            </tr>
+
+        </table>
+
+        <!-- DATA TABLE -->
+        <table>
+
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th>Description</th>
+                    <th width="15%">Quantity</th>
+                    <th width="20%">Rate</th>
+                    <th width="20%">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr th:each="item,stat : ${items}">
+
+                    <td class="text-center"
+                        th:text="${stat.index + 1}">
+                        1
+                    </td>
+
+                    <td th:text="${item.description}">
+                        Product Name
+                    </td>
+
+                    <td class="text-center"
+                        th:text="${item.quantity}">
+                        10
+                    </td>
+
+                    <td class="text-right"
+                        th:text="${item.rate}">
+                        100
+                    </td>
+
+                    <td class="text-right"
+                        th:text="${item.amount}">
+                        1000
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+        <!-- TOTAL SECTION -->
+        <table class="summary">
+
+            <tr>
+                <td><b>Subtotal</b></td>
+                <td class="text-right"
+                    th:text="${subtotal}">
+                    10000
+                </td>
+            </tr>
+
+            <tr>
+                <td><b>Tax</b></td>
+                <td class="text-right"
+                    th:text="${tax}">
+                    1800
+                </td>
+            </tr>
+
+            <tr>
+                <td><b>Total</b></td>
+                <td class="text-right"
+                    th:text="${total}">
+                    11800
+                </td>
+            </tr>
+
+        </table>
+
+        <div style="clear:both;"></div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+
+            <p>
+                This is a computer generated report.
+            </p>
+
+            <div class="signature">
+
+                Authorized Signature
+
+                <div class="signature-line"></div>
+
+            </div>
+
+        </div>
+
+    </body>
+</html>

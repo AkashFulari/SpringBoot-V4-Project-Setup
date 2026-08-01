@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+                   body{
+            font-family: Arial;
+            font-size:14px;
+        }
+               table{
+                   width:100%;
+            border-collapse: collapse;
+                   }
+               td{
+                   border:1px solid #ddd;
+            padding:8px;
+                   }
+               h1{
+                   text-align:center;
+                   }
+           </style>
+    </head>
+    <body>
+        <h1>User Profile TEMPLATE</h1>
+        <table>
+            <tr>
+                <td>Id</td>
+                <td th:text="${user.id}"></td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td th:text="${user.name}"></td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td th:text="${user.email}"></td>
+            </tr>
+            <tr>
+                <td>Avatar</td>
+                <td><img th:src="${user.avatar}" /></td>
+            </tr>
+            <tr>
+                <td>Department</td>
+                <td th:text="${user.name}"></td>
+            </tr>
+        </table>
+    </body>
+
+</html>
