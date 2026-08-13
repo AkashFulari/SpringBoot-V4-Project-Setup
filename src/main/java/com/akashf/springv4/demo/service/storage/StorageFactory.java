@@ -3,6 +3,7 @@ package com.akashf.springv4.demo.service.storage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.akashf.springv4.demo.service.Helper;
 import com.akashf.springv4.demo.service.storage.interfaces.StorageService;
 
 @Service
@@ -18,6 +19,7 @@ public class StorageFactory {
 
     public StorageFactory(AwsS3StorageService aws, AzureStorageService azure, GcpStorageService gcp,
             LocalStorageService local) {
+        Helper.o("StorageFactory initialized with mode: " + mode);
         this.aws = aws;
         this.azure = azure;
         this.gcp = gcp;
