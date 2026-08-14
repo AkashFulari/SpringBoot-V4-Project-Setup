@@ -1,4 +1,4 @@
-package com.akashf.springv4.demo.jobs;
+package com.akashf.springv4.demo.jobs.cron;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

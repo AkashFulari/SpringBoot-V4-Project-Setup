@@ -2,10 +2,12 @@ package com.akashf.springv4.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@EnableScheduling
+@EnableScheduling // For Cron Jobs
+@EnableAsync // For Async/Queue Tasks
 public class DemoApplication {
 
 	public static void main(String[] args) {
