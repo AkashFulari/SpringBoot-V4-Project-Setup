@@ -1,0 +1,320 @@
+<!doctype html>
+<html xmlns:th="http://thymeleaf.org" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${pageTitle}">FCM Test Panel</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 15px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      textarea,
+      input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0 16px 0;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      textarea {
+        height: 80px;
+        resize: vertical;
+      }
+      .status {
+        font-weight: bold;
+        margin: 10px 0;
+        padding: 5px;
+        border-radius: 4px;
+      }
+      .success {
+        color: #155724;
+        background: #d4edda;
+      }
+      .error {
+        color: #721c24;
+        background: #f8d7da;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 th:text="${pageTitle}">FCM Test Panel</h2>
+    <p>
+      Generate your local device identifier token on the left, then use the
+      controller form on the right to send yourself a test notification.
+    </p>
+
+    <div class="grid-container">
+      <!-- LEFT COLUMN: GENERATE TOKEN -->
+      <div class="card">
+        <h3>1. Client Token Generator</h3>
+        <button id="btn-token">Generate New Token</button>
+        <div id="client-status" class="status">
+          Status: Loading latest token...
+        </div>
+
+        <label><strong>Generated FCM Device Token:</strong></label>
+        <textarea
+          id="token-output"
+          readonly
+          placeholder="Your token will show up here..."
+        ></textarea>
+      </div>
+
+      <!-- RIGHT COLUMN: TRIGGER SPRING BOOT API NOTIFICATION -->
+      <div class="card">
+        <h3>2. Push Trigger Form</h3>
+        <form id="push-form">
+          <label>Target Device Token:</label>
+          <input
+            type="text"
+            id="form-token"
+            required
+            placeholder="Paste the generated token here"
+          />
+
+          <label>Alert Title:</label>
+          <input type="text" id="form-title" value="Hello Client!" required />
+
+          <label>Alert Body Content:</label>
+          <input
+            type="text"
+            id="form-body"
+            value="This notification was triggered via Spring Boot MVC!"
+            required
+          />
+
+          <button type="submit">Dispatch Push Notification</button>
+        </form>
+        <div id="api-status" class="status" style="display: none"></div>
+      </div>
+    </div>
+
+    <!-- Firebase Modular Scripts -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getMessaging,
+        getToken,
+        onMessage,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+      // TODO: Update configuration blocks with your real console values
+      const firebaseConfig = {
+        apiKey: "AIzaSyDEIZ0fWEtnHWSS8md2Z045nUODVp_SyEA",
+        authDomain: "test-38252.firebaseapp.com",
+        projectId: "test-38252",
+        storageBucket: "test-38252.firebasestorage.app",
+        messagingSenderId: "341750630566",
+        appId: "1:341750630566:web:d980a7b07c3c105da8cc67",
+      };
+      const VAPID_KEY =
+        "BHTHEA4rClznD35fSSATZNKemki2CmUedQqYY9cuMsBgfxAtlGKAET2SC2b-OQSgTg5y4PquHVXdTSyePvzlzX8";
+
+      const app = initializeApp(firebaseConfig);
+      const messaging = getMessaging(app);
+
+      // UI Binding Elements
+      const tokenButton = document.getElementById("btn-token");
+      const clientStatus = document.getElementById("client-status");
+      const tokenOutput = document.getElementById("token-output");
+      const formToken = document.getElementById("form-token");
+
+      /**
+       * Fetch the latest notification token from the database.
+       * This is called on page load to reuse existing tokens.
+       */
+      async function fetchLatestToken() {
+        try {
+          const response = await fetch("/token/latest");
+          if (response.ok) {
+            const data = await response.json();
+            if (data.info && data.info.token) {
+              tokenOutput.value = data.info.token;
+              formToken.value = data.info.token;
+              clientStatus.innerText =
+                "Status: Latest token loaded from database";
+              clientStatus.className = "status success";
+              return data.info.token;
+            }
+          }
+        } catch (err) {
+          console.log(
+            "No existing token found, ready to generate a new one:",
+            err.message,
+          );
+        }
+        clientStatus.innerText =
+          "Status: No token found, click 'Generate New Token' to create one";
+        clientStatus.className = "status";
+        return null;
+      }
+
+      /**
+       * Save a newly generated token to the database.
+       */
+      async function saveTokenToDatabase(token) {
+        try {
+          const response = await fetch("/token/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              token: token,
+              device: "WEB",
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Token saved successfully:", data);
+            return true;
+          } else {
+            const errorData = await response.json();
+            console.error("Failed to save token:", errorData);
+            clientStatus.innerText = "Error: Failed to save token to database";
+            clientStatus.className = "status error";
+            return false;
+          }
+        } catch (error) {
+          console.error("Error saving token:", error);
+          clientStatus.innerText = "Error: " + error.message;
+          clientStatus.className = "status error";
+          return false;
+        }
+      }
+
+      /**
+       * Generate a new notification token and save it to the database.
+       * Only generates when user explicitly clicks the button.
+       */
+      async function generateAndSaveToken() {
+        clientStatus.innerText = "Processing system permissions...";
+        clientStatus.className = "status";
+
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            // Generate new token from Firebase
+            const currentToken = await getToken(messaging, {
+              vapidKey: VAPID_KEY,
+            });
+
+            if (currentToken) {
+              // Save the generated token to database
+              clientStatus.innerText = "Saving token to database...";
+              const saved = await saveTokenToDatabase(currentToken);
+
+              if (saved) {
+                // Only populate the form after successful persistence
+                tokenOutput.value = currentToken;
+                formToken.value = currentToken;
+                clientStatus.innerText =
+                  "Token generated and saved successfully!";
+                clientStatus.className = "status success";
+              } else {
+                // Token generated but not saved - do not treat as active
+                tokenOutput.value = "";
+                formToken.value = "";
+                clientStatus.innerText =
+                  "Error: Token generated but failed to save. Please try again.";
+                clientStatus.className = "status error";
+              }
+            } else {
+              clientStatus.innerText =
+                "Error: Failed to generate token from Firebase";
+              clientStatus.className = "status error";
+            }
+          } else {
+            clientStatus.innerText = "System notification permission denied.";
+            clientStatus.className = "status error";
+          }
+        } catch (err) {
+          clientStatus.innerText = "Error: " + err.message;
+          clientStatus.className = "status error";
+        }
+      }
+
+      // Step 1: Fetch latest token on page load
+      window.addEventListener("load", () => {
+        fetchLatestToken();
+      });
+
+      // Step 1.5: Generate New Token Button Click
+      tokenButton.addEventListener("click", async () => {
+        await generateAndSaveToken();
+      });
+
+      // Step 2 Form Submission To Spring Boot API
+      document
+        .getElementById("push-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const apiStatus = document.getElementById("api-status");
+          apiStatus.style.display = "block";
+          apiStatus.innerText = "Transmitting data to API...";
+          apiStatus.className = "status";
+
+          const payload = {
+            targetToken: document.getElementById("form-token").value,
+            title: document.getElementById("form-title").value,
+            body: document.getElementById("form-body").value,
+          };
+
+          try {
+            // Hits your @RestController notification endpoint built earlier
+            const response = await fetch("/test-fcm", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+              const msgId = await response.text();
+              apiStatus.innerText = "Dispatched! Message ID: " + msgId;
+              apiStatus.className = "status success";
+            } else {
+              apiStatus.innerText = "API server rejected the dispatch payload.";
+              apiStatus.className = "status error";
+            }
+          } catch (error) {
+            apiStatus.innerText =
+              "Network transmission failure: " + error.message;
+            apiStatus.className = "status error";
+          }
+        });
+
+      // // Foreground Message Alert Listener
+      // onMessage(messaging, (payload) => {
+      //   alert(
+      //     `Foreground Notification Received!\nTitle: ${payload.notification.title}\nBody: ${payload.notification.body}`,
+      //   );
+      // });
+    </script>
+  </body>
+</html>

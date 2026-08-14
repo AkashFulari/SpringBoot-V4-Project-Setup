@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,7 @@ import com.akashf.springv4.demo.service.Helper;
 import com.akashf.springv4.demo.service.storage.interfaces.StorageService;
 
 @Service
+@ConditionalOnProperty(name = "storage.mode", havingValue = "azure")
 public class AzureStorageService implements StorageService {
     private final BlobContainerClient container;
 

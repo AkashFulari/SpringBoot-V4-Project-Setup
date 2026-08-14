@@ -3,6 +3,7 @@ package com.akashf.springv4.demo.service.storage;
 import java.io.IOException;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.akashf.springv4.demo.service.Helper;
@@ -13,6 +14,7 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 
 @Service
+@ConditionalOnProperty(name = "storage.mode", havingValue = "gcp")
 public class GcpStorageService implements StorageService {
     private final Storage storage;
 

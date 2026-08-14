@@ -79,6 +79,24 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.14.1</version>
 		</dependency>
+		<!-- Google Firebase FCM -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.3.0</version>
+		</dependency>
+		<!-- 
+			SPRING BOOT ACTUATOR
+			Purpose: Provides built-in, production-ready operational endpoints.
+			Usage for Testing: Used here to expose the '/actuator/scheduledtasks' endpoint.
+			This allows developers and QA teams to inspect, download, and verify 
+			the registration, configuration, and presence of all Cron jobs/scheduled tasks 
+			within the application context without manual logging.
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>

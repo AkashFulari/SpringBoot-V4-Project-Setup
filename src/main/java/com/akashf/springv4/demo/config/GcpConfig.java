@@ -3,6 +3,7 @@ package com.akashf.springv4.demo.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,6 +14,7 @@ import com.google.cloud.storage.StorageOptions;
 import org.springframework.core.io.ClassPathResource;
 
 @Configuration
+@ConditionalOnProperty(name = "storage.mode", havingValue = "gcp")
 public class GcpConfig {
 
     @Value("${storage.gcp.project-id}")

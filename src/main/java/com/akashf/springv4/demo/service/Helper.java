@@ -8,6 +8,12 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.akashf.springv4.demo.dto.NotifyReq;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -106,5 +112,24 @@ public class Helper {
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
+    }
+
+    public static String notifyFCM(NotifyReq req) {
+        // Build the basic visual alert
+        Notification notification = Notification.builder()
+                .setTitle(req.getTitle())
+                .setBody(req.getBody())
+                .build();
+        // Build the message targeting a specific device token
+        Message message = Message.builder()
+                .setToken(req.getTargetToken())
+                .setNotification(notification)
+                .build();
+        try {
+            // Send the message synchronously
+            return FirebaseMessaging.getInstance().send(message);
+        } catch (Exception e) {
+            return "Error sending notification: " + e.getMessage();
+        }
     }
 }

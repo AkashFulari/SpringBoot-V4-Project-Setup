@@ -25,7 +25,7 @@ goto help
 
 :run
 echo Starting Spring Boot...
-call mvnw spring-boot:run
+call mvnw spring-boot:run >> log.log
 goto end
 
 
