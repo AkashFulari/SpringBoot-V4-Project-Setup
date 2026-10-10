@@ -1,0 +1,64 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/AkashFulari/SpringBoot-V4-Project-Setup.git'
+            }
+        }
+
+        stage('Build and Test') {
+            steps {
+                // Option 1: Default output
+                // Command: mvnw.cmd clean package
+                // Shows normal Maven logs, download progress, and build details.
+                // Best when you want to see everything Maven reports.
+                // bat 'mvnw.cmd clean package'
+        
+        
+                // Option 2: Batch mode + no transfer progress
+                // Command: mvnw.cmd -B -ntp clean package
+                // Hides download progress indicators but keeps useful Maven logs.
+                // Recommended for routine Jenkins builds.
+                bat '@mvnw.cmd -B -ntp clean package'
+        
+        
+                // Option 3: Quiet mode
+                // Command: mvnw.cmd -B -ntp -q clean package
+                // Suppresses most Maven informational output.
+                // Useful when you want a cleaner console.
+                // bat '@mvnw.cmd -B -ntp -q clean package'
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'target/surefire-reports/TEST-*.xml'
+            }
+        }
+
+        stage('Archive JAR') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar',
+                                 fingerprint: true
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution finished.'
+        }
+
+        success {
+            echo 'CI pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'CI pipeline failed. Check the stage logs.'
+        }
+    }
+}
